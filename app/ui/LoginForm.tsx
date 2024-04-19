@@ -6,7 +6,7 @@ export default function LoginForm() {
     const initialState = { errors: {}, message: ''}
     const [ state, dispatch ] = useFormState(login, initialState)
     return (
-        <form action={dispatch} className="border border-1 rounded shadow p-2 space-y-2 w-1/3">
+        <form action={dispatch} className="border border-1 rounded shadow p-2 space-y-2 w-full lg:w-1/3">
             <label htmlFor="email" className="block">
                 <span className="text-sm">Email</span>
                 <input id="email" type="email" name="email" className="p-2 block w-full border border-1 border-gray-300 rounded" aria-describedby="email-error" required />

@@ -12,7 +12,7 @@ export default function SignupForm() {
     const [confirmPassword, setConfirmPassword] = useState('')
     
     return (
-        <form action={dispatch} className="border border-1 rounded shadow p-2 space-y-2 w-1/3">
+        <form action={dispatch} className="border border-1 rounded shadow p-2 space-y-2 w-full lg:w-1/3">
             <label htmlFor="name" className="block">
                 <span className="text-sm">Name</span>
                 <input id="name" name="name" type="text" className="p-2 block w-full border border-1 border-gray-300 rounded" required/>
