@@ -56,5 +56,31 @@ export async function updateSession(request: NextRequest) {
 
   await supabase.auth.getUser()
 
+  // console.log(process.env.wow)
+  if(request.nextUrl.pathname.startsWith('/dashboard')) {
+    let cookie = request.cookies.get('dist')
+    
+    if(!cookie) {
+      const cred = await fetch(`${process.env.tokenUrl}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: process.env.wow
+      }).then(data => data.json())
+      
+      console.log(cred)
+      response.headers.append('Set-Cookie', `dist=${cred.access_token}; Max-Age=${cred.expires_in}; HttpOnly=true; SameSite=true; secure=true;`)
+      // @ts-ignore
+      response.cookies.set({
+        name: 'dist',
+        value: cred.access_token,
+        httpOnly: true,
+        maxAge: cred.expires_in
+      })
+      return response
+    }
+  }
+
   return response
 }

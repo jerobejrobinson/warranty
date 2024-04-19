@@ -14,6 +14,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const originalWarn = console.warn.bind(console.warn);
+  console.warn = (msg, ...params) => {
+    if (
+      msg.includes('Using supabase.auth.getSession() is potentially insecure')
+    ) {
+      return;
+    }
+    originalWarn(msg, ...params);
+  };
   return (
     <html lang="en">
       <body className={inter.className}>{children}</body>

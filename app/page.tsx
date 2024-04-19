@@ -15,6 +15,7 @@ export default function Page() {
       {form === 'login' && <LoginForm />}
       {form === 'signup' && <SignupForm />}
       <p className="text-xs p-2">Click <span className="text-blue-600 hover:underline" role="button" aria-pressed="false" onClick={handleFormToggle}>here</span> to create an account.</p>
+      <p className="text-xs p-2">Placeholder for <span className="text-blue-600 hover:underline" role="button" aria-pressed="false">reset password</span>!</p>
     </main>
   );
 }
