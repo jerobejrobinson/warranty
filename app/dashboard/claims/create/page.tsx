@@ -1,10 +1,9 @@
-
-import GetInvoice from "@/app/ui/dashboard/claims/GetInvoice"
-
+import SearchByPart from "@/components/SearchByPart"
 export default function page() {
+
     return (
-        <section className="p-4 h-full">
-            <GetInvoice />
-        </section>
+        <>
+            <SearchByPart />
+        </>
     )
 }

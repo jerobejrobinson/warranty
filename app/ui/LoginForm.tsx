@@ -1,7 +1,7 @@
 'use client'
 import { login } from "@/app/lib/actions"
 import { useFormState } from "react-dom"
-
+import { Button } from '@/components/ui/button'
 export default function LoginForm() {
     const initialState = { errors: {}, message: ''}
     const [ state, dispatch ] = useFormState(login, initialState)
@@ -21,6 +21,7 @@ export default function LoginForm() {
                 <input id="password" type="password" name="password" className="p-2 block w-full border border-1 border-gray-300 rounded" required/>
             </label>
             <button type="submit" className="bg-blue-400 text-white w-full p-4 rounded !mt-4 hover:bg-blue-600 transition-all">Login</button>
+            <Button>Test</Button>
         </form>
     )
 }

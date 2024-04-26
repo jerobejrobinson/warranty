@@ -12,13 +12,14 @@ const LoginSchema = z.object({
 
 export type State = {
     errors?: {
+        message?: string;
         email?: string[];
         password?: string[];
     };
     message?: string;
 }
 
-export async function login(prevState: State, formData: FormData) {
+export async function login(prevState: State, formData: FormData): Promise<State> {
     const rawFormData = Object.fromEntries(formData.entries())
     const validatedFields = LoginSchema.safeParse(rawFormData)
     if(!validatedFields.success) {
@@ -37,7 +38,9 @@ export async function login(prevState: State, formData: FormData) {
     const { error } = await supabase.auth.signInWithPassword(data)
     if(error) {
         return {
-            message: 'Failed to log in user.'
+            errors: {
+                message: error.message
+            }
         }
     } else {
         redirect('/dashboard')
@@ -45,35 +48,41 @@ export async function login(prevState: State, formData: FormData) {
 }
 
 const SignupSchema = z.object({
-    name: z.string({
-        required_error: "Name is required",
+    firstName: z.string({
+        required_error: "First Name is required",
+    }),
+    lastName: z.string({
+        required_error: "Last Name is required",
+    }),
+    accountNumber: z.string({
+        required_error: "Account number is required", 
     }),
     email: z.string({
         required_error: "Email is required",
-    }),
-    salesId: z.string({
-        required_error: "Sales Id is required",
-    }),
+    }).email(),
     password: z.string(),
-    confirmPassword: z.string()
+    phone: z.string(),
 })
 
 export type SignupState = {
+    message?: string | null;
     errors?: {
-        name?: string[];
+        firstName?: string[];
+        lastName?: string[];
+        accountNumber?: string[];
         email?: string[];
         password?: string[];
-        salesId?: string[];
-    };
-    message?: string | null;
+        phone?: string[];
+    } | undefined;
 }
 
-const CompleteSignup = SignupSchema.omit({confirmPassword: true})
+const CompleteSignup = SignupSchema.omit({})
 
-export async function signup(prevState: SignupState, formData: FormData) {
+export async function signup(prevState: SignupState, formData: FormData): Promise<SignupState> {
+    
     const rawFormData = Object.fromEntries(formData.entries())
     const validatedFields = CompleteSignup.safeParse(rawFormData)
-
+    console.log(rawFormData)
     if(!validatedFields.success) {
         console.log(validatedFields.error)
         return {
@@ -82,22 +91,32 @@ export async function signup(prevState: SignupState, formData: FormData) {
         }
     }
     
-    try {
-        const supabase = createClient()
-        await supabase.auth.signUp({
-            email: validatedFields.data.email,
-            password: validatedFields.data.password,
-            options: {
-                data: {
-                  name: validatedFields.data.name,
-                  salesId: validatedFields.data.salesId
-                },
-              },
-        })
-    } catch(error) {
-        return { message: 'Failed to sign up user' }
-    }
-    redirect('/auth/verify-email')
+    console.log(validatedFields.data)
+    
+    const supabase = createClient()
+    const {data, error} = await supabase.auth.signUp({
+        email: validatedFields.data.email,
+        password: validatedFields.data.password,
+    })
+    console.log(error)
+    console.log('auth-data', data)
+    if(data) {
+        const { data, error } = await supabase.from('profile')
+            .insert({
+                first_name: validatedFields.data.firstName, 
+                last_name: validatedFields.data.lastName, 
+                account_number: validatedFields.data.accountNumber, 
+                email: validatedFields.data.email, 
+                phone: validatedFields.data.phone
+            })
+        
+        console.log('data', data)
+        console.log('error', error)
+    } 
+    
+    if(error) return {message: 'Auth error'}
+    return { message: 'success', errors: undefined }
+    // redirect('/auth/verify-email')
 }
 
 export async function signout() {
@@ -109,49 +128,68 @@ export async function signout() {
     redirect('/')
 }
 
-export async function getInvoice(formData: FormData) {
+// Need to add zod validation here
+export async function getInvoicesByPartNumber({linecode, partnumber}: {linecode: string; partnumber: string}) {
     const cookieStore = cookies()
     const dist = cookieStore.get('dist')
-    const json = {
-        "request": {
-          "companyNumber": 3,
-          "operatorInit": "web",
-          "operatorPassword": "",
-          "orderNumber": Number(formData.get('invoiceNumber') as string),
-          "orderSuffix": 0,
-          "includeHeaderData": true,
-          "includeTotalData": true,
-          "includeTaxData": true,
-          "includeLineData": true
-        }
-    }
-
-    const { response } = await fetch(`${process.env.CSD_URL}/sxapioegetsingleorder`, {
+    const query = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_TRN/DATAFABRIC/compass/v2/jobs/?queryExecutor=datalake`, {
         method: 'POST',
         headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${dist?.value}`
+            'Accept': 'application/json',
+            'Authorization': `bearer ${dist?.value}`,
+            'Charset': 'utf-8',
+            'Content-Type': 'text/plain',   
         },
-        body: JSON.stringify(json)
+        body: `SELECT 
+                    price, 
+                    ordersuf, 
+                    orderno, 
+                    netord, 
+                    enterdt,
+                    canceldt,
+                    whse,
+                    shipprod,
+                    qtyord,
+                    slsrepin,
+                    slsrepout
+          FROM oeel WHERE shipprod = '${linecode+partnumber}' AND custno = '1325'`
     }).then(data => data.json())
 
-    const contact = new Map()
-    response?.tFieldlist['t-fieldlist'].forEach(({fieldName, fieldValue}: {fieldName: string; fieldValue: string | null}) => {
-        contact.set(fieldName, fieldValue)
-    });
-    
-    return {
-        details: {
-            customerName: contact.get('name'),
-            accountNumber: contact.get('custno'),
-            salesRepId: contact.get('slsrepin'),
-            totalInvoiceAmount: contact.get('totinvamt'),
-            invoiceNumber: contact.get('orderno'),
-        },
-        parts: response?.tOelineitem['t-oelineitem'],
-        rawRes: response?.tFieldlist['t-fieldlist']
+    if(!query.queryId) return 'query error'
+
+    async function getStatus() {
+        const status: any = await new Promise((resolve, reject) => {
+            setTimeout(async () => {
+                const status = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_TRN/DATAFABRIC/compass/v2/jobs/${query.queryId}/status/?timeout=0&queryExecutor=datalake`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `bearer ${dist?.value}`,
+                        'Charset': 'utf-8',
+                    },
+                }).then( data => data.json())
+                console.log('status resolved')
+                console.log(status)
+                resolve(status)
+            }, 10000)
+        })
+
+        return status
     }
+
+    let status = await getStatus()
+    while(status.status != 'FINISHED') {
+        status = await getStatus()
+    }
+    const res = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_TRN/DATAFABRIC/compass/v2/jobs/${query.queryId}/result/?offset=0&limit=100000&queryExecutor=datalake`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `bearer ${dist?.value}`,
+            'Charset': 'utf-8',
+        },
+    }).then( data => data.json())
+    return res
 }
 
 export async function submitClaim(obj: any) {
