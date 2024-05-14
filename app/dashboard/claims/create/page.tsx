@@ -1,9 +1,20 @@
 import SearchByPart from "@/components/SearchByPart"
-export default function page() {
+import ClaimForm from "@/components/ClaimForm"
+export default function page({
+    searchParams
+}: {
+    searchParams: { [key: string]: string | undefined}
+}) {
+    
+    if(searchParams.type === 'part-search') {
+        console.log(searchParams)
+        if( searchParams.id != undefined ) return ( <ClaimForm id={searchParams.id} /> )
+        return ( <SearchByPart /> )
+    }
 
     return (
-        <>
-            <SearchByPart />
-        </>
+        <div>
+            invalid select search option
+        </div>
     )
 }

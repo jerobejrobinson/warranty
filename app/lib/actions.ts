@@ -5,6 +5,18 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/app/utils/supabase/server'
 import { z } from 'zod'
 
+export async function Signout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    redirect('/')
+}
+
+export async function submitClaimV2() {
+    const supabase = createClient()
+    console.log(await supabase.auth.getUser())
+}
+
+
 const LoginSchema = z.object({
     email: z.string().email(),
     password: z.string()
@@ -62,6 +74,13 @@ const SignupSchema = z.object({
     }).email(),
     password: z.string(),
     phone: z.string(),
+    companyName: z.string(),
+    address_1: z.string(),
+    address_2: z.string(),
+    state: z.string(),
+    zip: z.string(),
+    country: z.string(),
+    city: z.string()
 })
 
 export type SignupState = {
@@ -73,6 +92,13 @@ export type SignupState = {
         email?: string[];
         password?: string[];
         phone?: string[];
+        companyName?: string[];
+        address_1?: string[];
+        address_2?: string[];
+        state?:string[];
+        zip?: string[];
+        country?: string[];
+        city?: string[];
     } | undefined;
 }
 
@@ -94,29 +120,29 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     console.log(validatedFields.data)
     
     const supabase = createClient()
-    const {data, error} = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
         email: validatedFields.data.email,
         password: validatedFields.data.password,
+        options: {
+            data: {
+                first_name: validatedFields.data.firstName,
+                last_name: validatedFields.data.lastName,
+                email: validatedFields.data.email,
+                account_number: validatedFields.data.accountNumber,
+                phone: validatedFields.data.phone,
+                company_name: validatedFields.data.companyName,
+                address_1: validatedFields.data.address_1,
+                address_2: validatedFields.data.address_2,
+                state: validatedFields.data.state,
+                zip: validatedFields.data.zip,
+                country: validatedFields.data.country,
+                city: validatedFields.data.city
+            }
+        }
     })
-    console.log(error)
-    console.log('auth-data', data)
-    if(data) {
-        const { data, error } = await supabase.from('profile')
-            .insert({
-                first_name: validatedFields.data.firstName, 
-                last_name: validatedFields.data.lastName, 
-                account_number: validatedFields.data.accountNumber, 
-                email: validatedFields.data.email, 
-                phone: validatedFields.data.phone
-            })
-        
-        console.log('data', data)
-        console.log('error', error)
-    } 
     
     if(error) return {message: 'Auth error'}
-    return { message: 'success', errors: undefined }
-    // redirect('/auth/verify-email')
+    redirect('/auth/verify-email')
 }
 
 export async function signout() {

@@ -9,7 +9,10 @@ import {
 import { Button } from "./ui/button"
 import { Badge } from "@/components/ui/badge"
 
-export default async function ClaimCard({ claim }: {claim: any}) {
+import { ClaimCardType } from '@/lib/types'
+
+
+export default async function ClaimCard({claim}: {claim: ClaimCardType}) {
     function status(claim: any) {
         let status = null
         if(!claim.shipment) {
@@ -53,7 +56,7 @@ export default async function ClaimCard({ claim }: {claim: any}) {
                     <dt>Price</dt>
                     <dd>{'$'}{claim.price}</dd>
                     <dt>Customer Name</dt>
-                    <dd>{claim.customer.name}</dd>
+                    <dd>{claim.profile.name}</dd>
                 </dl>
             </CardContent>
             <CardFooter className="flex flex-row justify-between">

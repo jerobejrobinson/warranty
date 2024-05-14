@@ -14,7 +14,9 @@ export default async function layout({ children }: { children: React.ReactNode }
             <div className="col-span-10 row-span-1 xl:col-span-1 xl:row-span-10">
                 <Nav />
             </div>
-            <div className="col-span-10 row-span-9 xl:col-span-9 xl:row-span-10 bg-gray-200">{children}</div>
+            <div className="col-span-10 row-span-9 xl:col-span-9 xl:row-span-10 bg-gray-200">
+                {children}
+            </div>
         </main>
     )
 }

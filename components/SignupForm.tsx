@@ -3,6 +3,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
   Card,
   CardContent,
   CardDescription,
@@ -11,7 +18,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
+import states from '@/lib/states'
 // Server Action
 import { signup } from "@/app/lib/actions"
 
@@ -26,7 +33,7 @@ export default function SignupForm() {
     })
     return (
         <form action={dispatch}>
-            <Card className="mx-auto max-w-sm">
+            <Card className="mx-auto">
                 <CardHeader>
                     <CardTitle className="text-xl">Sign Up</CardTitle>
                     <CardDescription>
@@ -34,54 +41,91 @@ export default function SignupForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-4 grid-cols-2">
+                        {/* Left Side */}
+                        <div className="grid grid-cols-2 gap-4 border-r-2 pr-4">
+                            <div className="grid gap-2 col-span-2">
+                                <Label htmlFor="companyName">Company Name</Label>
+                                <Input placeholder="Company Name" name="companyName" required />
+                            </div>
+                            <div className="grid gap-2 col-span-2">
+                                <Label htmlFor="address_1">Address 1</Label>
+                                <Input placeholder="Address 1" name="address_1" required />
+                            </div>
+                            <div className="grid gap-2 col-span-2 grid-cols-2">
+                                <div>
+                                    <Label htmlFor="address_2">Address 2</Label>
+                                    <Input placeholder="Address 2" name="address_2"/>
+                                </div>
+                                <div>
+                                    <Label htmlFor="city">City</Label>
+                                    <Input placeholder="City" name="city" required />
+                                </div>
+                            </div>
+                            <div className="grid gap-2 col-span-2 grid-cols-3">
+                                <div className="">
+                                    <Label htmlFor="state">State</Label>
+                                    <Input placeholder="State" name="state" required />
+                                </div>
+                                <div className="">
+                                    <Label htmlFor="zip">Zip</Label>
+                                    <Input placeholder="Zip" name="zip" required />
+                                </div>
+                                <div className="">
+                                    <Label htmlFor="country">Country</Label>
+                                    <Input placeholder="country" name="country" required />
+                                </div>
+                            </div>
+                        </div>
+                        {/* Right Side */}
+                        <div className="grid gap-4 grid-cols-2">
                             <div className="grid gap-2">
                                 <Label htmlFor="firstName">First name</Label>
                                 <Input id="firstName" placeholder="Max" name="firstName" required />
                             </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="lastName">Last name</Label>
-                            <Input id="lastName" placeholder="Robinson" name="lastName" required />
+                            <div className="grid gap-2">
+                                <Label htmlFor="lastName">Last name</Label>
+                                <Input id="lastName" placeholder="Robinson" name="lastName" required />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 col-span-2">
+                                <div className="">
+                                    <Label htmlFor="accountNumber">Account No#</Label>
+                                    <Input
+                                        id="accountNumber"
+                                        type="text"
+                                        placeholder="99999"
+                                        name="accountNumber"
+                                        required
+                                    />
+                                </div>
+                                <div className="">
+                                    <Label htmlFor="phone">Phone</Label>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        placeholder="9016980988"
+                                        name="phone"
+                                        required
+                                        pattern="[0-9]{10}"
+                                    />
+                                </div>
+                            </div>
+                            <div className="col-span-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="m@example.com"
+                                    name="email"
+                                    required
+                                />
+                            </div>
+                            <div className="col-span-2">
+                                <Label htmlFor="password">Password</Label>
+                                <Input id="password" type="password" name="password"/>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                        <div className="grid gap-2 col-span-1">
-                            <Label htmlFor="accountNumber">Account No#</Label>
-                            <Input
-                                id="accountNumber"
-                                type="text"
-                                placeholder="99999"
-                                name="accountNumber"
-                                required
-                            />
-                        </div>
-                        <div className="grid gap-2 col-span-2">
-                            <Label htmlFor="phone">Phone</Label>
-                            <Input
-                                id="phone"
-                                type="text"
-                                placeholder="(901) 698-0988"
-                                name="phone"
-                                required
-                            />
-                        </div>
-                    </div>
-                    <div className="grid gap-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                            id="email"
-                            type="email"
-                            placeholder="m@example.com"
-                            name="email"
-                            required
-                            />
-                        </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" name="password"/>
-                    </div>
-                        <Button type="submit" className="w-full">
+                        <Button type="submit" className="w-full col-span-2">
                             Create an account
                         </Button>
                     </div>
