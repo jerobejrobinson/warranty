@@ -59,7 +59,8 @@ export async function updateSession(request: NextRequest) {
   // console.log(process.env.wow)
   if(request.nextUrl.pathname.startsWith('/dashboard')) {
     let cookie = request.cookies.get('dist')
-    
+    let LtCookie = request.cookies.get('lt')
+
     if(!cookie) {
       const cred = await fetch(`${process.env.tokenUrl}`, {
         method: 'POST',
@@ -69,8 +70,8 @@ export async function updateSession(request: NextRequest) {
         body: process.env.wow
       }).then(data => data.json())
       
-      console.log(cred)
       response.headers.append('Set-Cookie', `dist=${cred.access_token}; Max-Age=${cred.expires_in}; HttpOnly=true; SameSite=true; secure=true;`)
+      
       // @ts-ignore
       response.cookies.set({
         name: 'dist',
@@ -79,6 +80,31 @@ export async function updateSession(request: NextRequest) {
         maxAge: cred.expires_in
       })
       return response
+    }
+
+    if(cookie && !LtCookie) {
+      console.log(cookie)
+      const data = await fetch(`${process.env.ltURL}`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `bearer ${cookie.value}`,
+            'Charset': 'utf-8',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ "Cono": 3,"Oper": "web" })
+      }).then(data => data.json())
+
+      console.log(data)
+      response.headers.append('Set-Cookie', `lt=${data.Token}; Max-Age=14400; HttpOnly=true; SameSite=true; secure=true;`)
+      // @ts-ignore
+      response.cookies.set({
+        name: 'lt',
+        value: data.Token,
+        httpOnly: true,
+        maxAge: 14400
+      })
+
     }
   }
 

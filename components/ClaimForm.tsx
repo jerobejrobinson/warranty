@@ -54,14 +54,15 @@ export default function ClaimForm({ id }: { id: string }) {
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({ resolver: zodResolver(formSchema) })
     // 2. Define a submit handler.
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
         // Submit invoice and prod along with values from form.
         console.log('active')
         console.log(values)
-        console.log(id.split('~'))
-        submitClaimV2()
+        // console.log(id.split('~'))
+        await submitClaimV2(values, id)
+        
     }
 
     return (

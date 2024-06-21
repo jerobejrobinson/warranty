@@ -5,18 +5,26 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/app/utils/supabase/server'
 import { z } from 'zod'
 
-export async function Signout() {
+// New SubmitClaim Server Action
+export async function submitClaimV2(values: any, id: string) {
     const supabase = createClient()
-    await supabase.auth.signOut()
-    redirect('/')
+    const { data } = await supabase.auth.getUser()
+    const arr = id.split('~')
+    const { data: claim, error } = await supabase.from('claim').insert([{
+        ...values,
+        part_number: arr[0]+arr[2],
+        qty: Number(arr[3]),
+        invoice_number: arr[1],
+        price: Number(arr[5]),
+        profile: data?.user?.id,
+    }]).select().single()
+    if(claim) {
+        redirect('/dashboard/claims')
+    }
 }
+// END
 
-export async function submitClaimV2() {
-    const supabase = createClient()
-    console.log(await supabase.auth.getUser())
-}
-
-
+// Login Server Action
 const LoginSchema = z.object({
     email: z.string().email(),
     password: z.string()
@@ -58,7 +66,9 @@ export async function login(prevState: State, formData: FormData): Promise<State
         redirect('/dashboard')
     }
 }
+// END
 
+// Signup Server Action
 const SignupSchema = z.object({
     firstName: z.string({
         required_error: "First Name is required",
@@ -144,7 +154,9 @@ export async function signup(prevState: SignupState, formData: FormData): Promis
     if(error) return {message: 'Auth error'}
     redirect('/auth/verify-email')
 }
+// END
 
+// Signout Server Action
 export async function signout() {
     const supabase = createClient()
     const {error} = await supabase.auth.signOut()
@@ -153,9 +165,46 @@ export async function signout() {
     }
     redirect('/')
 }
+// END
 
+// GetInvoiceByDateRange 
+export async function getInvoiceByDateRange({fromDate, toDate}: { fromDate: string; toDate: string}) {
+    const supabase = createClient()
+    const { data: customerData, error } = await supabase.auth.getUser()
+    const { data: profile } = await supabase.from('profiles').select('account_number').eq('id', customerData?.user?.id).single()
+    const cookieStore = cookies()
+    const dist = cookieStore.get('dist')
+    const lt = cookieStore.get('lt')
+    console.log(dist)
+    console.log('date =>', fromDate)
+    console.log('date =>', toDate)
+    const data = await fetch(`${process.env.CSD_INTERFACE_URL}/sxeapi/api/oe/oeel/lookup`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Authorization': `bearer ${dist?.value}`,
+            'Charset': 'utf-8',
+            'Content-Type': 'application/json',
+            'Token': `${lt?.value}`
+        },
+        body: JSON.stringify({ custno: profile?.account_number, fromentered: fromDate, toentered: toDate })
+    }).then(data => data.json())
+    
+    const arr = data.loadoeelttresults.filter(({shipprod}: {shipprod: string}) => {
+        let icOrDc = shipprod.slice(-2)
+        if(icOrDc.toUpperCase() === 'IC' || icOrDc.toUpperCase() === 'DC') return false
+        else return true
+    })
+    return arr;
+}
+// END 
+
+// GetInvoicesByPartNumber Server Action
 // Need to add zod validation here
 export async function getInvoicesByPartNumber({linecode, partnumber}: {linecode: string; partnumber: string}) {
+    const supabase = createClient()
+    const { data, error } = await supabase.auth.getUser()
+    const { data: profile } = await supabase.from('profiles').select('account_number').eq('id', data?.user?.id).single()
     const cookieStore = cookies()
     const dist = cookieStore.get('dist')
     const query = await fetch(`https://mingle-ionapi.inforcloudsuite.com/D7NMH8MYY885DBPS_TRN/DATAFABRIC/compass/v2/jobs/?queryExecutor=datalake`, {
@@ -178,7 +227,7 @@ export async function getInvoicesByPartNumber({linecode, partnumber}: {linecode:
                     qtyord,
                     slsrepin,
                     slsrepout
-          FROM oeel WHERE shipprod = '${linecode+partnumber}' AND custno = '1325'`
+          FROM oeel WHERE shipprod = '${linecode+partnumber}' AND custno = ${profile?.account_number}`
     }).then(data => data.json())
 
     if(!query.queryId) return 'query error'
@@ -217,7 +266,9 @@ export async function getInvoicesByPartNumber({linecode, partnumber}: {linecode:
     }).then( data => data.json())
     return res
 }
+// END
 
+// OLD SubmitClaim Server Action
 export async function submitClaim(obj: any) {
     const supabase = createClient()
     
@@ -272,4 +323,91 @@ export async function submitClaim(obj: any) {
         console.log('claim data', data)
         console.log('claim error', claimError)
     return data
+}
+// END
+
+// Create shipment server action
+export type initalShipmentSchema = {
+    length: string;
+    width: string
+    height: string;
+    weight: string;
+    drop_off: 'true' | 'false';
+    id: string;
+}
+export async function createShipment(input: initalShipmentSchema) {
+    const supabase = createClient()
+    // insert data into shipment table
+    const { data: shipmentData, error } = await supabase.from('shipment').insert([{
+        length: Number(input.length),
+        width: Number(input.width),
+        height: Number(input.height),
+        weight: Number(input.weight),
+        drop_off: input.drop_off === 'true' ? true : false,
+    }]).select().single()
+    // get shipment.id
+    const shipmentId = shipmentData?.id;
+    // insert shipment.id into the claim from claim table
+    const { data: claimData, error: claimError } = await supabase.from('claim').update({shipment_id: shipmentId}).eq('id', input.id).select().single()
+    console.log('error', claimError)
+    if(claimData) {
+        revalidatePath(`/dashboard/claims/${input.id}`)
+    }
+}
+// END
+
+// createRGA server action
+export async function createRGA(claimId: string) {
+    const supabase = createClient()
+    const { data: dataRGA, error: errorRGA } = await supabase.from('rga').insert([{ }]).select().single()
+    console.log('rga error', errorRGA)
+    const { data: claimData, error: claimError } = await supabase.from('claim').update({rga_id: dataRGA?.id}).eq('id', claimId).select().single()
+    
+    if(claimData) {
+        revalidatePath(`/dashboard/claims/${claimId}`)
+    }
+}
+
+// upload file server action
+export async function uploadFile(fileList: FileList) {
+    console.log(fileList)
+    // const supabase = createClient()
+    // const files = Array.from(fileList)
+    // if(fileType === 'img') {
+    //     const file = files.map(async (file) => {
+    //         const { data, error } = await supabase.storage.from('claims').upload(`${id}/photos/${file.name}`, file, {
+    //             cacheControl: '3600',
+    //             upsert: false
+    //         })
+    //         console.log(data, error)
+    //         return data 
+    //     })
+    //     return file
+    // } else {
+    //     const file = files.map(async (file) => {
+    //         const { data, error } = await supabase.storage.from('claims').upload(`${id}/photos/${file.name}`, file, {
+    //             cacheControl: '3600',
+    //             upsert: false
+    //         })
+    //         return data 
+    //     })
+    //     return file
+    // }
+}
+
+export async function test(id: any) {
+    console.log('test', id)
+    return true
+}
+
+// submitComment server action
+export async function submitComment(comment: string, claimId: string) {
+    const supabase = createClient()
+    const { data: userData } = await supabase.auth.getUser()
+    const { data, error } = await supabase.from('comment').insert([{ comment: comment, claim_id: claimId, user_id: userData.user?.id }])
+    console.log(error)
+    if(data) {
+        console.log(data)
+        revalidatePath(`/dashboard/claims/${claimId}`)
+    }
 }

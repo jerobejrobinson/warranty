@@ -1,4 +1,5 @@
 import SearchByPart from "@/components/SearchByPart"
+import SearchByDate from "@/components/SearchByDate"
 import ClaimForm from "@/components/ClaimForm"
 export default function page({
     searchParams
@@ -7,9 +8,13 @@ export default function page({
 }) {
     
     if(searchParams.type === 'part-search') {
-        console.log(searchParams)
         if( searchParams.id != undefined ) return ( <ClaimForm id={searchParams.id} /> )
         return ( <SearchByPart /> )
+    }
+    
+    if(searchParams.type === 'date-range') {
+        if( searchParams.id != undefined ) return ( <ClaimForm id={searchParams.id} /> )
+        return ( <SearchByDate />)
     }
 
     return (

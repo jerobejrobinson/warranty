@@ -362,7 +362,7 @@ export type ClaimCardType = {
     qty: number
     price: number
     profile: {
-        name: string
+        first_name: string
     }
     part_number: string
     rga?: {

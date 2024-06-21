@@ -1,19 +1,15 @@
-'use client'
-import { useState } from "react";
-import LoginForm from "@/components/LoginForm";
-import SignupForm from "@/components/SignupForm";
-
-export default function Page() {  
-  const [form, setForm] = useState<"login" | "signup">('login') 
-
-  const handleFormToggle = () => {
-    setForm((prev) => {
-      return prev === 'login' ? 'signup' : 'login'
-    })
+import { createClient } from "@/app/utils/supabase/server";
+import { redirect } from "next/navigation";
+export default async function Page() {  
+  const supabase = createClient()
+  const { data } = await supabase.auth.getUser()
+  if(data?.user) {
+    redirect('/dashboard')
   }
+  
   return (
-    <main className="flex flex-col h-screen justify-center items-center p-4">
-      Welcome to claims
+    <main className="">
+      
     </main>
   );
 }
