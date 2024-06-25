@@ -12,7 +12,7 @@ export default function UserActions({id, claim}: {id: string; claim: any}) {
                 <TabsTrigger value="addComment">Add Comment</TabsTrigger>
             </TabsList>
             <TabsContent value="packageDetails" className="px-3">
-                {claim.shipment ? <p>Package details and arrival method has been sent to MSP.</p> : <ShippingForm id={id} rga_id={claim.rga.id}/>}
+                {claim.shipment && claim.rga ? <p>Package details and arrival method has been sent to MSP.</p> : <ShippingForm id={id} rga_id={claim.rga.id}/>}
             </TabsContent>
             <TabsContent value="addPhotos" className="px-3">
                 <FileForm fileType="img" id={id}/>
