@@ -3,8 +3,6 @@ import { createClient } from '@/app/utils/supabase/server';
 export default async function DisplayShippingInformation({id}: {id: string;}) {
     const supabase = createClient()
     const { data, error} = await supabase.from('claim').select('shipment ( * )').eq('id', id).single<any>()
-    console.log('shipping error', error)
-    console.log(data)
     if(data.shipment) {
         return (
             <section className='w-full pt-4'>

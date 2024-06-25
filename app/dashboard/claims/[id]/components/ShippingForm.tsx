@@ -26,7 +26,7 @@ const formSchema = z.object({
     })
 })
 
-export function ShippingForm({id}: {id: string}) {
+export function ShippingForm({id, rga_id}: {id: string; rga_id: string}) {
     // 1. Define your form
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -36,7 +36,7 @@ export function ShippingForm({id}: {id: string}) {
     })
     // 2. Define a submit handler
     function onSubmit(values: z.infer<typeof formSchema>) {
-         createShipment({...values, id})
+         createShipment({...values, id, rga_id})
     }
 
     return (
@@ -47,8 +47,8 @@ export function ShippingForm({id}: {id: string}) {
                         control={form.control}
                         name="drop_off"
                         render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Shipping Selection</FormLabel>
+                            <FormItem className="mb-2">
+                                <FormLabel>Will you be dropping off package at Memphis location?</FormLabel>
                                 <FormControl>
                                     <RadioGroup
                                         onValueChange={field.onChange}
@@ -69,7 +69,6 @@ export function ShippingForm({id}: {id: string}) {
                                         </FormItem>
                                     </RadioGroup>
                                 </FormControl>
-                                <FormDescription>Select Yes to drop off at Memphis location, otherwise a shipping label will be sent.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -85,6 +84,7 @@ export function ShippingForm({id}: {id: string}) {
                                     <FormControl>
                                         <Input placeholder="length" {...field} type="number" />
                                     </FormControl>
+                                    
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -128,8 +128,9 @@ export function ShippingForm({id}: {id: string}) {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit">Confirm Shipping Input</Button>
+                        <Button type="submit">Confirm Package Details</Button>
                     </div>
+                    <FormDescription>Please enter package details even if dropping off at location.</FormDescription>
                 </form>
             </Form>
         </div>

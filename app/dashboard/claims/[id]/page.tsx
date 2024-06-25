@@ -16,7 +16,7 @@ export default async function Page({ params }: {params: {id: string}}) {
     const supabase = createClient()
     
     const { data: admin } = await supabase.from('admin').select('*').limit(1).single()
-    const { data } = await supabase.from('claim').select('*, shipment (id, drop_off, tracking_number ), rga (id, rga_number), profiles ( company_name )').eq("id", params.id).single()
+    const { data } = await supabase.from('claim').select('*, shipment (id, drop_off, tracking_number ), rga (id, rga_number, status), profiles ( first_name, last_name, company_name )').eq("id", params.id).single()
 
     const Links = [
         {anchor: 'Back to claims', url: '/dashboard/claims'},

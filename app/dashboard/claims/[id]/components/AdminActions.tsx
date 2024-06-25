@@ -3,12 +3,15 @@ import { FileForm } from "./FileForm"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CreateRGA } from "./CreateRGA";
 import CommentForm from "./CommentForm";
+import StatusUpdate from "./StatusUpdate";
+import { Status } from "shippo";
 export default function AdminActions({id, claim}: {id: string; claim: any}) {
     return (
         <Tabs defaultValue="Package Details" className="p-4">
             <TabsList>
-                {!claim.rga ? <TabsTrigger value="submitClaim">Submit Claim</TabsTrigger> : null}
-                <TabsTrigger value="packageDetails">Package Details</TabsTrigger>
+                {!claim.rga ? <TabsTrigger value="submitClaim">Acknowledge Claim</TabsTrigger> : null}
+                {claim.shipment ? <TabsTrigger value="packageDetails">Submit Package Details</TabsTrigger> : null}
+                {claim.shipment && claim.rga ? <TabsTrigger value="claimStatus">Update Claim Status</TabsTrigger> : null}
                 <TabsTrigger value="addPhotos">Add Photos</TabsTrigger>
                 <TabsTrigger value="addDocuments">Add Any Supporting Documents</TabsTrigger>
                 <TabsTrigger value="addComment">Add Comment</TabsTrigger>
@@ -23,6 +26,9 @@ export default function AdminActions({id, claim}: {id: string; claim: any}) {
             </TabsContent>
             <TabsContent value="addPhotos" className="px-3">
                 <FileForm fileType="img" id={id}/>
+            </TabsContent>
+            <TabsContent value="claimStatus" className="px-3">
+                <StatusUpdate id={id} rga_id={claim.rga.id}/>
             </TabsContent>
             <TabsContent value="addDocuments" className="px-3">
                 <FileForm fileType="pdf" id={id}/>

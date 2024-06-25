@@ -44,14 +44,14 @@ export default function CommentForm({ id }: { id: string;}) {
                     name="comment"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Comment</FormLabel>
+                            <FormLabel>Add new comment to claim</FormLabel>
                             <FormControl>
                                 <Input 
                                     {...field}
                                     placeholder="Enter your comment"
                                 />
                             </FormControl>
-                            <FormDescription>Add comments to claim.</FormDescription>
+                            <FormDescription>Veiw comments near bottom of claim page.</FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}

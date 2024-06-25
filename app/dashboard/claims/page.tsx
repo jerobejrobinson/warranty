@@ -3,10 +3,12 @@ import ClaimCard from "@/components/ClaimCard"
 import CreatePopover from "@/components/CreatePopover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+export const revalidate = 3600
+
 export default async function page() {
     const supabase = createClient()
     const { data: admin } = await supabase.from('admin').select('*').limit(1).single()
-    const { data: claims } = await supabase.from('claim').select('id, invoice_number, date_submitted, part_number, qty, price, profiles ( company_name ), rga (id, rga_number), shipment (id, drop_off)')
+    const { data: claims } = await supabase.from('claim').select('id, invoice_number, date_submitted, part_number, qty, price, profiles ( company_name ), rga (id, rga_number, status), shipment (id, drop_off)')
     return (
         <>
             <section className="p-4 relative h-full flex flex-col gap-4">

@@ -334,6 +334,7 @@ export type initalShipmentSchema = {
     weight: string;
     drop_off: 'true' | 'false';
     id: string;
+    rga_id: string;
 }
 export async function createShipment(input: initalShipmentSchema) {
     const supabase = createClient()
@@ -348,21 +349,29 @@ export async function createShipment(input: initalShipmentSchema) {
     // get shipment.id
     const shipmentId = shipmentData?.id;
     // insert shipment.id into the claim from claim table
-    const { data: claimData, error: claimError } = await supabase.from('claim').update({shipment_id: shipmentId}).eq('id', input.id).select().single()
-    console.log('error', claimError)
-    if(claimData) {
+    const { error: claimError } = await supabase.from('claim').update({shipment_id: shipmentId}).eq('id', input.id).select()
+    const { error: rgaError } = await supabase.from('rga').update({status: 'Package Details Submitted' }).eq('id', input.rga_id).select()
+    if(!claimError && !rgaError) {
         revalidatePath(`/dashboard/claims/${input.id}`)
     }
 }
 // END
+// Update claim status server action
+export async function updateRgaStatus({id, rga_id, status}: {id: string; rga_id: string; status: string}) {
+    const supabase = createClient()
+    const { error: errorRGA } = await supabase.from('rga').update({ status: status }).eq('id', rga_id)
+    if(!errorRGA) {
+        revalidatePath(`/dashboard/claims/${id}`)
+    }
+}
 
+// End
 // createRGA server action
 export async function createRGA(claimId: string) {
     const supabase = createClient()
-    const { data: dataRGA, error: errorRGA } = await supabase.from('rga').insert([{ }]).select().single()
+    const { data: dataRGA, error: errorRGA } = await supabase.from('rga').insert([{ status: 'Claim Acknowledged' }]).select().single()
     console.log('rga error', errorRGA)
     const { data: claimData, error: claimError } = await supabase.from('claim').update({rga_id: dataRGA?.id}).eq('id', claimId).select().single()
-    
     if(claimData) {
         revalidatePath(`/dashboard/claims/${claimId}`)
     }
