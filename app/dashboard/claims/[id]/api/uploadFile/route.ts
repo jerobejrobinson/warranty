@@ -33,7 +33,7 @@ export async function POST(request: Request, context: { params: Params }) {
 
         const data = await Promise.all(res)
         console.log(data)
-        revalidatePath(`/dashboard/claims/${id}`)
+        revalidatePath(`/dashboard/claims/[id]`, 'page')
         return new Response(null, { status: 200 })
     }   
 }
