@@ -294,7 +294,7 @@ export default function ClaimForm({ id }: { id: string }) {
                             name='diagnostics'
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel>Describe diagnostics tests preformed</FormLabel>
+                                    <FormLabel>Describe diagnostics tests performed</FormLabel>
                                     <FormControl>
                                         <Textarea className="resize-none" {...field}/>
                                     </FormControl>
