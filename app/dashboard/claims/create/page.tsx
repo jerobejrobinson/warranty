@@ -1,6 +1,9 @@
 import SearchByPart from "@/components/SearchByPart"
 import SearchByDate from "@/components/SearchByDate"
 import ClaimForm from "@/components/ClaimForm"
+
+export const maxDuration = 60;
+
 export default function page({
     searchParams
 }: {
