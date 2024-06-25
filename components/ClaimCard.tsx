@@ -35,7 +35,7 @@ export default async function ClaimCard({claim}: {claim: any}) {
                         <dt>Quanity</dt>
                         <dd>{claim.qty}</dd>
                         <dt>Price</dt>
-                        <dd>{'$'}{claim.price}</dd>
+                        <dd>{'$'}{claim.price.toFixed(2)}</dd>
                         <dt>Customer Name</dt>
                         <dd>{claim.profiles.company_name}</dd>
                     </dl>
