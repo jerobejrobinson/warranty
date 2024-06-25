@@ -63,7 +63,7 @@ export default async function Page({ params }: {params: {id: string}}) {
                             <dd>{data.qty}</dd>
                             <hr className='col-span-2'/>
                             <dt>Price</dt>
-                            <dd>{'$'}{data.price}</dd>
+                            <dd>{'$'}{data.price.toFixed(2)}</dd>
                         </dl>
                         <h2 className='text-xl font-bold mb-4'>Vehicle Information</h2>
                         <dl className="grid grid-cols-2 gap-4">
