@@ -62,6 +62,7 @@ export async function updateSession(request: NextRequest) {
     let LtCookie = request.cookies.get('lt')
 
     if(!cookie) {
+      console.log(`${process.env.tokenUrl}`)
       const cred = await fetch(`${process.env.tokenUrl}`, {
         method: 'POST',
         headers: {
@@ -83,7 +84,7 @@ export async function updateSession(request: NextRequest) {
     }
 
     if(cookie && !LtCookie) {
-      console.log(cookie)
+      console.log(`${process.env.ltURL}`)
       const data = await fetch(`${process.env.ltURL}`, {
         method: 'POST',
         headers: {
