@@ -12,9 +12,6 @@ export function status(claim: any) {
     //     status = claim.rga.status
     // }
     if(claim.rga) {
-        if(claim.shipment) {
-          
-        }
         status = claim.rga.status
     } 
     return status

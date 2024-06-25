@@ -63,7 +63,7 @@ export async function login(prevState: State, formData: FormData): Promise<State
             }
         }
     } else {
-        redirect('/dashboard')
+        redirect('/dashboard/claims')
     }
 }
 // END

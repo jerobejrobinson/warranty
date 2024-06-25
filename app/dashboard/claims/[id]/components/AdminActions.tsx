@@ -28,7 +28,7 @@ export default function AdminActions({id, claim}: {id: string; claim: any}) {
                 <FileForm fileType="img" id={id}/>
             </TabsContent>
             <TabsContent value="claimStatus" className="px-3">
-                <StatusUpdate id={id} rga_id={claim.rga.id}/>
+                <StatusUpdate id={id} rga_id={claim.rga}/>
             </TabsContent>
             <TabsContent value="addDocuments" className="px-3">
                 <FileForm fileType="pdf" id={id}/>

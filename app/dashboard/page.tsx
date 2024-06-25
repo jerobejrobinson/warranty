@@ -1,8 +1,9 @@
+import DashboardClaims from "./components/DashboardClaims";
 
 export default async function Page() {
   return (
     <section className="">
-      Dashboard
+      <DashboardClaims />
     </section>
   );
 }
