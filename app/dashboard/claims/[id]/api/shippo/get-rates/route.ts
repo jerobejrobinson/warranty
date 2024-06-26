@@ -10,6 +10,7 @@ type Params = {
     id: string
 }
 export async function GET(request: Request, context: { params: Params }) {
+    console.log(`${process.env.SHIPPO_TEST_API_KEY}`)
     const shippo = new Shippo({apiKeyHeader: process.env.SHIPPO_TEST_API_KEY})
     const id = context.params.id
     const supabase = createClient()
